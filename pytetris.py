@@ -100,11 +100,6 @@ shape_definitions = {
         "###",
         " # "
     ]},
-        'TT': {'color': 'toi', 'hitbox': [
-        "#####",
-        " #   "
-        
-    ]},
     'Z': {'color': 'zl', 'hitbox': [
         "## ",
         " ##"
@@ -120,12 +115,6 @@ class Shape:
         self.rotation = 0
         self.x = 4
         self.y = 0
-        if not is_ghost:
-            gui_image_path = f'images/gui/{self.id}.png'
-            if os.path.exists(gui_image_path):
-                self.gui_sprite = pygame.image.load(gui_image_path).convert_alpha()
-            else:
-                self.gui_sprite = pygame.image.load('images/gui/fuckery.png').convert_alpha()
         self.create_pieces()
 
     def create_pieces(self):
@@ -164,12 +153,16 @@ class Shape:
                 return
             self.x -= offset * dir
 
-    def draw(self):
+    def draw(self, offset_x=0, offset_y=0, center=False):
         for piece in self.pieces:
             piece_rect = piece['image'].get_rect()
-            piece_rect.x = 96 + (8 * (self.x + piece['localx']))
-            piece_rect.y = 40 + (8 * (self.y + piece['localy']))
+            piece_rect.x = 96 + (8 * (self.x + piece['localx'])) + offset_x
+            piece_rect.y = 40 + (8 * (self.y + piece['localy'])) + offset_y
+            if center:
+                piece_rect.x += (4 - self.width) * 4  # Center horizontally
+                piece_rect.y += (2 - self.height) * 4  # Center vertically
             screen.blit(piece['image'], piece_rect)
+
 
     def stamp(self):
         global stamps
@@ -233,7 +226,7 @@ def flashStamps():
     global AREpauseLength
     for pos, piece in flash_stamps:
         if AREpauseLength <= (TotalAREpauseLength / (2 * AREFlashes)) or (AREpauseLength > (TotalAREpauseLength / (2 * AREFlashes)) * 2 and AREpauseLength <= (TotalAREpauseLength / (2 * AREFlashes)) * 3) or (AREpauseLength > (TotalAREpauseLength / (2 * AREFlashes)) * 4 and AREpauseLength <= (TotalAREpauseLength / (2 * AREFlashes)) * 5):
-            screen.blit(pygame.image.load('images/pieces/ghost2.png').convert_alpha(), pos)
+            screen.blit(pygame.image.load('images/pieces/ghost.png').convert_alpha(), pos)
         else:
             screen.blit(piece['image'], pos)
 
@@ -395,7 +388,9 @@ while running:
             running = False
             break
     if running:
-        screen.blit(nextShape.gui_sprite, (191, 95))
+        nextShape.x = 0  # Reset the position for the next shape preview
+        nextShape.y = 0  # Reset the position for the next shape preview
+        nextShape.draw(offset_x=100, offset_y=70, center=True)  # Draw next shape to the right of the main screen
         if show_ghost:
             ghostShape.draw()
     currentShape.draw()
