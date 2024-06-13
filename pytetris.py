@@ -3,10 +3,6 @@ import random
 import os
 import copy
 
-# Potential Todo:
-# Don't generate new shape until line finishes clearing (kept doing it anyways when I tried?),
-# Add config file for controls
-
 controls = {
     "left": {pygame.K_LEFT},
     "right": {pygame.K_RIGHT},
@@ -163,7 +159,6 @@ class Shape:
                 piece_rect.y += (2 - self.height) * 4  # Center vertically
             screen.blit(piece['image'], piece_rect)
 
-
     def stamp(self):
         global stamps
         for piece in self.pieces:
@@ -226,7 +221,7 @@ def flashStamps():
     global AREpauseLength
     for pos, piece in flash_stamps:
         if AREpauseLength <= (TotalAREpauseLength / (2 * AREFlashes)) or (AREpauseLength > (TotalAREpauseLength / (2 * AREFlashes)) * 2 and AREpauseLength <= (TotalAREpauseLength / (2 * AREFlashes)) * 3) or (AREpauseLength > (TotalAREpauseLength / (2 * AREFlashes)) * 4 and AREpauseLength <= (TotalAREpauseLength / (2 * AREFlashes)) * 5):
-            screen.blit(pygame.image.load('images/pieces/ghost.png').convert_alpha(), pos)
+            screen.blit(pygame.image.load('images/pieces/ghost2.png').convert_alpha(), pos)
         else:
             screen.blit(piece['image'], pos)
 
@@ -319,17 +314,11 @@ while running:
                 if i:
                     sounds['rotate'].play()
             if (not paused) and (not AREpaused) and event.key in controls['hard_drop']:
-                while not collided:
+                while not any(getTileonMap(currentShape.x + piece['localx'], currentShape.y + piece['localy'] + 1) != '' for piece in currentShape.pieces):
                     currentShape.y += 1
                     score += 2
                     if currentShape.y + currentShape.height >= 20:
-                        collided = True
-                    else:
-                        for piece in currentShape.pieces:
-                            if getTileonMap(currentShape.x + piece['localx'], currentShape.y + piece['localy']) != '':
-                                collided = True
-                                break
-                currentShape.y -= 1
+                        break
                 currentShape.stamp()
                 sounds['place'].play()
                 if not currentShape.id in stats.keys():
